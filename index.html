@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RYRY Meter ULTRA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#0d001a;
+      --bg2:#1a0033;
+      --bg3:#050010;
+
+      --panel:#1a0f2e;
+      --panel2:#120824;
+
+      --border:#b026ff;
+
+      --pink:#b026ff;
+      --cyan:#8b5cf6;
+
+      --yellow:#e9d5ff;
+      --green:#a78bfa;
+      --red:#f472b6;
+      --white:#f5f3ff;
+
+      --shadow:#000;
+
+      --bronze:#c084fc;
+      --silver:#ddd6fe;
+      --gold:#c084fc;
+    }
+
+    *{
+      box-sizing:border-box;
+    }
+
+    html,body{
+      margin:0;
+      min-height:100%;
+    }
+
+    body{
+      font-family:'Press Start 2P', cursive;
+      color:var(--white);
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,79,216,.16), transparent 18%),
+        radial-gradient(circle at 80% 30%, rgba(99,243,255,.12), transparent 18%),
+        radial-gradient(circle at 50% 80%, rgba(125,255,140,.08), transparent 18%),
+        linear-gradient(180deg, var(--bg1), var(--bg2) 45%, var(--bg3));
+      overflow-x:hidden;
+      image-rendering:pixelated;
+      padding:24px;
+    }
+
+    .bg{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index:0;
+    }
+
+    .star{
+      position:absolute;
+      width:4px;
+      height:4px;
+      background:#fff;
+      opacity:.8;
+      box-shadow:0 0 0 2px rgba(255,255,255,.08);
+      animation:floatStar linear infinite;
+    }
+
+    @keyframes floatStar{
+      from{ transform:translateY(0); opacity:.2; }
+      30%{ opacity:.9; }
+      to{ transform:translateY(-120vh); opacity:.1; }
+    }
+
+    .scanlines::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:1;
+      background:linear-gradient(
+        to bottom,
+        rgba(255,255,255,.03) 0px,
+        rgba(255,255,255,.03) 2px,
+        rgba(0,0,0,.04) 2px,
+        rgba(0,0,0,.04) 4px
+      );
+      background-size:100% 4px;
+      mix-blend-mode:soft-light;
+      opacity:.35;
+    }
+
+    .wrap{
+      position:relative;
+      z-index:2;
+      max-width:1280px;
+      margin:0 auto;
+    }
+
+    .title-box{
+      border:4px solid var(--cyan);
+      background:linear-gradient(180deg, #202845, #13192b);
+      padding:18px 14px;
+      text-align:center;
+      box-shadow:8px 8px 0 var(--shadow);
+      margin-bottom:20px;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(18px, 2.4vw, 34px);
+      line-height:1.5;
+      color:var(--yellow);
+      text-shadow:
+        3px 3px 0 #000,
+        0 0 14px rgba(255,224,102,.35);
+    }
+
+    .subtitle{
+      margin-top:10px;
+      font-size:10px;
+      color:var(--cyan);
+      line-height:1.6;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1.2fr .9fr;
+      gap:20px;
+      align-items:start;
+    }
+
+    .panel{
+      background:linear-gradient(180deg, var(--panel), var(--panel2));
+      border:4px solid var(--border);
+      box-shadow:8px 8px 0 var(--shadow);
+      padding:18px;
+    }
+
+    .section-title{
+      font-size:12px;
+      color:var(--pink);
+      margin:0 0 18px 0;
+      line-height:1.6;
+    }
+
+    .name-row{
+      display:grid;
+      grid-template-columns:1fr auto auto;
+      gap:10px;
+      margin-bottom:18px;
+    }
+
+    .pixel-input{
+      width:100%;
+      padding:14px 12px;
+      border:4px solid var(--cyan);
+      background:#090d18;
+      color:var(--white);
+      font-family:'Press Start 2P', cursive;
+      font-size:11px;
+      outline:none;
+      box-shadow:4px 4px 0 #000 inset;
+    }
+
+    .file-input-wrap{
+      margin-bottom:18px;
+    }
+
+    .file-input-label{
+      display:block;
+      font-size:9px;
+      color:var(--yellow);
+      margin-bottom:8px;
+      line-height:1.6;
+    }
+
+    .pixel-btn{
+      padding:14px 12px;
+      border:4px solid var(--pink);
+      background:#140915;
+      color:var(--pink);
+      font-family:'Press Start 2P', cursive;
+      font-size:10px;
+      cursor:pointer;
+      transition:transform .08s ease;
+      box-shadow:4px 4px 0 #000;
+    }
+
+    .pixel-btn:hover{
+      transform:translate(-1px,-1px);
+    }
+
+    .pixel-btn:active{
+      transform:translate(2px,2px);
+      box-shadow:2px 2px 0 #000;
+    }
+
+    .pixel-btn.alt{
+      border-color:var(--yellow);
+      color:var(--yellow);
+      background:#181204;
+    }
+
+    .stats{
+      display:grid;
+      gap:16px;
+    }
+
+    .trait label{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:8px;
+      font-size:10px;
+      color:var(--white);
+      line-height:1.5;
+    }
+
+    .value-badge{
+      color:var(--cyan);
+    }
+
+    input[type="range"]{
+      width:100%;
+      appearance:none;
+      -webkit-appearance:none;
+      background:#06080f;
+      border:4px solid var(--cyan);
+      height:18px;
+      margin:0;
+      cursor:pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb{
+      -webkit-appearance:none;
+      appearance:none;
+      width:22px;
+      height:30px;
+      border:4px solid #000;
+      background:var(--pink);
+      box-shadow:2px 2px 0 #000;
+    }
+
+    input[type="range"]::-moz-range-thumb{
+      width:22px;
+      height:30px;
+      border:4px solid #000;
+      background:var(--pink);
+      box-shadow:2px 2px 0 #000;
+    }
+
+    .bar{
+      height:18px;
+      background:#05060a;
+      border:4px solid var(--cyan);
+      margin-top:8px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .fill{
+      height:100%;
+      width:0;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          #a855f7 0 14px,
+          #6d28d9 14px 28px
+        );
+      transition:width .15s ease;
+    }
+
+    .hud{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns:repeat(2, 1fr);
+      gap:12px;
+    }
+
+    .hud-card{
+      border:4px solid var(--yellow);
+      background:#181409;
+      padding:14px 10px;
+      text-align:center;
+      min-height:96px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:10px;
+      box-shadow:6px 6px 0 #000;
+    }
+
+    .hud-card .k{
+      color:var(--yellow);
+      font-size:9px;
+      line-height:1.6;
+    }
+
+    .hud-card .v{
+      color:var(--white);
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .score-good{ color:var(--green) !important; }
+    .score-mid{ color:var(--yellow) !important; }
+    .score-bad{ color:var(--red) !important; }
+
+    .right-stack{
+      display:grid;
+      gap:20px;
+    }
+
+    .avatar-card{
+      display:grid;
+      grid-template-columns:140px 1fr;
+      gap:16px;
+      align-items:center;
+    }
+
+    .avatar-box{
+      border:4px solid var(--pink);
+      background:#0b0710;
+      padding:10px;
+      box-shadow:6px 6px 0 #000;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
+
+    #avatar{
+      width:96px;
+      height:96px;
+      image-rendering:pixelated;
+      border:4px solid #000;
+      background:#111;
+      object-fit:cover;
+      display:block;
+    }
+
+    .rank-box{
+      border:4px solid var(--green);
+      background:#08120c;
+      padding:12px;
+      box-shadow:6px 6px 0 #000;
+    }
+
+    .rank-title{
+      color:var(--green);
+      font-size:10px;
+      margin-bottom:10px;
+      line-height:1.6;
+    }
+
+    .rank-value{
+      font-size:16px;
+      line-height:1.7;
+    }
+
+    .flavor{
+      margin-top:10px;
+      font-size:9px;
+      color:var(--cyan);
+      line-height:1.8;
+    }
+
+    .chart-wrap{
+      border:4px solid var(--cyan);
+      background:#0a1020;
+      padding:12px;
+      box-shadow:6px 6px 0 #000;
+    }
+
+    .chart-title{
+      color:var(--cyan);
+      font-size:10px;
+      margin-bottom:12px;
+      line-height:1.6;
+    }
+
+    canvas{
+      width:100%;
+      display:block;
+    }
+
+    .leaderboard-panel{
+      margin-top:20px;
+    }
+
+    .leaderboard-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+
+    .leaderboard{
+      display:grid;
+      gap:10px;
+    }
+
+    .player{
+      border:4px solid var(--cyan);
+      background:#0b1120;
+      box-shadow:6px 6px 0 #000;
+      padding:12px;
+      display:grid;
+      grid-template-columns:auto auto 1fr auto;
+      gap:12px;
+      align-items:center;
+    }
+
+    .medal{
+      width:46px;
+      height:46px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:20px;
+      border:4px solid #000;
+      background:#222;
+      text-align:center;
+    }
+
+    .medal.gold{
+      background:var(--gold);
+      color:#000;
+    }
+
+    .medal.silver{
+      background:var(--silver);
+      color:#000;
+    }
+
+    .medal.bronze{
+      background:var(--bronze);
+      color:#000;
+    }
+
+    .medal.normal{
+      background:#1a1a1a;
+      color:var(--cyan);
+      font-size:12px;
+    }
+
+    .player-avatar{
+      width:52px;
+      height:52px;
+      image-rendering:pixelated;
+      border:4px solid #000;
+      background:#111;
+      box-shadow:4px 4px 0 #000;
+      flex-shrink:0;
+      object-fit:cover;
+      display:block;
+    }
+
+    .player-main{
+      min-width:0;
+    }
+
+    .player-name{
+      font-size:11px;
+      line-height:1.6;
+      color:var(--white);
+      word-break:break-word;
+    }
+
+    .player-sub{
+      margin-top:8px;
+      font-size:8px;
+      line-height:1.8;
+      color:var(--cyan);
+    }
+
+    .player-score{
+      text-align:right;
+      font-size:12px;
+      line-height:1.6;
+      color:var(--yellow);
+    }
+
+    .top-player{
+      border-color:var(--yellow);
+      background:linear-gradient(180deg, rgba(255,213,74,.12), rgba(11,17,32,1));
+      box-shadow:
+        6px 6px 0 #000,
+        0 0 20px rgba(255,213,74,.22);
+    }
+
+    .footer-note{
+      margin-top:14px;
+      color:#9db7ff;
+      font-size:8px;
+      line-height:1.8;
+      text-align:center;
+    }
+
+    @media (max-width: 980px){
+      .grid{
+        grid-template-columns:1fr;
+      }
+
+      .avatar-card{
+        grid-template-columns:1fr;
+      }
+
+      .avatar-box{
+        justify-self:center;
+      }
+    }
+
+    @media (max-width: 700px){
+      .player{
+        grid-template-columns:auto auto 1fr;
+      }
+
+      .player-score{
+        grid-column:1 / -1;
+        text-align:left;
+        padding-left:0;
+      }
+    }
+
+    @media (max-width: 640px){
+      body{
+        padding:14px;
+      }
+
+      .panel{
+        padding:14px;
+      }
+
+      .name-row{
+        grid-template-columns:1fr;
+      }
+
+      .hud{
+        grid-template-columns:1fr;
+      }
+
+      .subtitle{
+        font-size:9px;
+      }
+    }
+  </style>
+</head>
+<body class="scanlines">
+  <div class="bg" id="bg"></div>
+
+  <div class="wrap">
+    <div class="title-box">
+      <h1>🔥 RYRY METER ULTRA 🔥</h1>
+      <div class="subtitle">RETRO CHARACTER ANALYZER // INDIE GAME EDITION</div>
+    </div>
+
+    <div class="grid">
+      <section class="panel">
+        <h2 class="section-title">PLAYER BUILD CONFIG</h2>
+
+        <div class="name-row">
+          <input id="name" class="pixel-input" type="text" placeholder="ENTER PLAYER NAME">
+          <button class="pixel-btn alt" id="randomizeBtn" type="button">RANDOM</button>
+          <button class="pixel-btn" id="resetBtn" type="button">RESET</button>
+        </div>
+
+        <div style="margin-bottom:18px;">
+          <input id="variant" class="pixel-input" type="text" placeholder="COMMENT / FEATURE (ex: Singer)">
+        </div>
+
+        <div class="file-input-wrap">
+          <div class="file-input-label">UPLOAD PLAYER PICTURE (OPTIONAL)</div>
+          <input id="avatarUpload" class="pixel-input" type="file" accept="image/*">
+        </div>
+
+        <div class="stats">
+          <div class="trait">
+            <label>
+              <span>FUNNY</span>
+              <span class="value-badge" id="funnyValue">5</span>
+            </label>
+            <input class="slider" type="range" min="1" max="10" value="5" id="funny" oninput="updateBars()">
+            <div class="bar"><div class="fill" id="funnyBar"></div></div>
+          </div>
+
+          <div class="trait">
+            <label>
+              <span>ZESTY</span>
+              <span class="value-badge" id="zestyValue">5</span>
+            </label>
+            <input class="slider" type="range" min="1" max="10" value="5" id="zesty" oninput="updateBars()">
+            <div class="bar"><div class="fill" id="zestyBar"></div></div>
+          </div>
+
+          <div class="trait">
+            <label>
+              <span>HUMOROUS</span>
+              <span class="value-badge" id="humorousValue">5</span>
+            </label>
+            <input class="slider" type="range" min="1" max="10" value="5" id="humorous" oninput="updateBars()">
+            <div class="bar"><div class="fill" id="humorousBar"></div></div>
+          </div>
+
+          <div class="trait">
+            <label>
+              <span>DEEPVOICE</span>
+              <span class="value-badge" id="deepvoiceValue">5</span>
+            </label>
+            <input class="slider" type="range" min="1" max="10" value="5" id="deepvoice" oninput="updateBars()">
+            <div class="bar"><div class="fill" id="deepvoiceBar"></div></div>
+          </div>
+
+          <div class="trait">
+            <label>
+              <span>ANNOYING</span>
+              <span class="value-badge" id="annoyingValue">5</span>
+            </label>
+            <input class="slider" type="range" min="1" max="10" value="5" id="annoying" oninput="updateBars()">
+            <div class="bar"><div class="fill" id="annoyingBar"></div></div>
+          </div>
+        </div>
+
+        <div class="hud">
+          <div class="hud-card">
+            <div class="k">% RYRY</div>
+            <div class="v score-good" id="scoreDisplay">50% RYRY</div>
+          </div>
+          <div class="hud-card">
+            <div class="k">AI JUDGE</div>
+            <div class="v" id="aiJudge">BALANCED MENACE</div>
+          </div>
+        </div>
+
+        <div style="margin-top:18px; display:flex; gap:12px; flex-wrap:wrap;">
+          <button class="pixel-btn" id="addPlayerBtn" type="button">ADD TO LEADERBOARD</button>
+          <button class="pixel-btn alt" id="clearBoardBtn" type="button">CLEAR BOARD</button>
+        </div>
+      </section>
+
+      <section class="right-stack">
+        <div class="panel avatar-card">
+          <div class="avatar-box">
+            <canvas id="avatar" width="96" height="96"></canvas>
+          </div>
+
+          <div>
+            <div class="rank-box">
+              <div class="rank-title">CURRENT CLASS</div>
+              <div class="rank-value" id="rankValue">NPC BOSS</div>
+              <div class="flavor" id="flavorText">balanced chaos with suspicious timing</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="chart-wrap">
+            <div class="chart-title">STAT RADAR</div>
+            <canvas id="radarChart" width="420" height="360"></canvas>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="panel leaderboard-panel">
+      <div class="leaderboard-head">
+        <h2 class="section-title" style="margin:0;">🏆 PLAYER RANKINGS</h2>
+      </div>
+      <div class="leaderboard" id="players"></div>
+      <div class="footer-note">DATA SAVED LOCALLY // NO INTERNET // PURE PIXEL MADNESS</div>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "ryryPlayersUltra";
+
+    const nameInput = document.getElementById("name");
+    const variantInput = document.getElementById("variant");
+    const avatarUpload = document.getElementById("avatarUpload");
+
+    const funnyInput = document.getElementById("funny");
+    const zestyInput = document.getElementById("zesty");
+    const humorousInput = document.getElementById("humorous");
+    const deepvoiceInput = document.getElementById("deepvoice");
+    const annoyingInput = document.getElementById("annoying");
+
+    const funnyBar = document.getElementById("funnyBar");
+    const zestyBar = document.getElementById("zestyBar");
+    const humorousBar = document.getElementById("humorousBar");
+    const deepvoiceBar = document.getElementById("deepvoiceBar");
+    const annoyingBar = document.getElementById("annoyingBar");
+
+    const funnyValue = document.getElementById("funnyValue");
+    const zestyValue = document.getElementById("zestyValue");
+    const humorousValue = document.getElementById("humorousValue");
+    const deepvoiceValue = document.getElementById("deepvoiceValue");
+    const annoyingValue = document.getElementById("annoyingValue");
+
+    const scoreDisplay = document.getElementById("scoreDisplay");
+    const aiJudge = document.getElementById("aiJudge");
+    const rankValue = document.getElementById("rankValue");
+    const flavorText = document.getElementById("flavorText");
+    const playersDiv = document.getElementById("players");
+
+    const randomizeBtn = document.getElementById("randomizeBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const addPlayerBtn = document.getElementById("addPlayerBtn");
+    const clearBoardBtn = document.getElementById("clearBoardBtn");
+
+    const radarCanvas = document.getElementById("radarChart");
+    const radarCtx = radarCanvas.getContext("2d");
+
+    const avatarCanvas = document.getElementById("avatar");
+    const avatarCtx = avatarCanvas.getContext("2d");
+
+    const maxScore =
+      (10 * 1.15) +
+      (10 * 1.1) +
+      (10 * 1.2) +
+      (10 * 1.3) +
+      (10 * 0.9);
+
+    let players = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    let uploadedAvatar = null;
+
+    function getStats(){
+      return {
+        funny: +funnyInput.value,
+        zesty: +zestyInput.value,
+        humorous: +humorousInput.value,
+        deepvoice: +deepvoiceInput.value,
+        annoying: +annoyingInput.value
+      };
+    }
+
+    function calcRyryScore(stats){
+      return (
+        stats.funny * 1.15 +
+        stats.zesty * 1.1 +
+        stats.humorous * 1.2 +
+        stats.deepvoice * 1.3 +
+        stats.annoying * 0.9
+      );
+    }
+
+    function getAiJudge(stats, score){
+      const maxStat = Math.max(
+        stats.funny,
+        stats.zesty,
+        stats.humorous,
+        stats.deepvoice,
+        stats.annoying
+      );
+
+      if(stats.deepvoice >= 9 && stats.annoying <= 5) return "BASS EMPEROR";
+      if(stats.funny >= 8 && stats.humorous >= 8) return "COMEDY RAID BOSS";
+      if(stats.zesty >= 9 && stats.humorous >= 7) return "SPICE OVERDRIVE";
+      if(stats.annoying >= 9) return "AUDIO JUMPSCARE";
+      if(score >= 41) return "CUTSCENE THREAT";
+      if(maxStat <= 6) return "BALANCED MENACE";
+      return "UNSTABLE BUILD";
+    }
+
+    function getRank(score){
+      if(score >= 44) return "FINAL BOSS";
+      if(score >= 39) return "NPC BOSS";
+      if(score >= 34) return "ELITE UNIT";
+      if(score >= 29) return "SIDE QUEST KING";
+      if(score >= 23) return "LOUD CITIZEN";
+      return "BACKGROUND NPC";
+    }
+
+    function getFlavor(stats){
+      if(
+        stats.funny > stats.zesty &&
+        stats.funny > stats.humorous &&
+        stats.funny > stats.deepvoice &&
+        stats.funny > stats.annoying
+      ){
+        return "punchline-first build with zero cooldown";
+      }
+
+      if(
+        stats.zesty > stats.funny &&
+        stats.zesty > stats.humorous &&
+        stats.zesty > stats.deepvoice &&
+        stats.zesty > stats.annoying
+      ){
+        return "spice aura detected at unsafe levels";
+      }
+
+      if(
+        stats.humorous > stats.funny &&
+        stats.humorous > stats.zesty &&
+        stats.humorous > stats.deepvoice &&
+        stats.humorous > stats.annoying
+      ){
+        return "laugh farming specialist class";
+      }
+
+      if(
+        stats.deepvoice > stats.funny &&
+        stats.deepvoice > stats.zesty &&
+        stats.deepvoice > stats.humorous &&
+        stats.deepvoice > stats.annoying
+      ){
+        return "voice heavy build with suspicious authority";
+      }
+
+      if(
+        stats.annoying > stats.funny &&
+        stats.annoying > stats.zesty &&
+        stats.annoying > stats.humorous &&
+        stats.annoying > stats.deepvoice
+      ){
+        return "combat type: psychological damage";
+      }
+
+      return "all stats distributed for peak confusion";
+    }
+
+    function scoreColorClass(percent){
+      if(percent >= 75) return "score-good";
+      if(percent >= 50) return "score-mid";
+      return "score-bad";
+    }
+
+    function showUploadedPreview(dataUrl){
+      const img = new Image();
+      img.onload = function(){
+        avatarCtx.clearRect(0, 0, 96, 96);
+        avatarCtx.imageSmoothingEnabled = false;
+        avatarCtx.fillStyle = "#111";
+        avatarCtx.fillRect(0, 0, 96, 96);
+
+        const size = Math.min(img.width, img.height);
+        const sx = (img.width - size) / 2;
+        const sy = (img.height - size) / 2;
+
+        avatarCtx.drawImage(img, sx, sy, size, size, 0, 0, 96, 96);
+        avatarCtx.strokeStyle = "#000";
+        avatarCtx.lineWidth = 4;
+        avatarCtx.strokeRect(0, 0, 96, 96);
+      };
+      img.src = dataUrl;
+    }
+
+    function updateBars(){
+      const stats = getStats();
+      const score = calcRyryScore(stats);
+      const percentRyry = (score / maxScore) * 100;
+      const judge = getAiJudge(stats, score);
+      const rank = getRank(score);
+      const flavor = getFlavor(stats);
+
+      funnyBar.style.width = (stats.funny * 10) + "%";
+      zestyBar.style.width = (stats.zesty * 10) + "%";
+      humorousBar.style.width = (stats.humorous * 10) + "%";
+      deepvoiceBar.style.width = (stats.deepvoice * 10) + "%";
+      annoyingBar.style.width = (stats.annoying * 10) + "%";
+
+      funnyValue.textContent = stats.funny;
+      zestyValue.textContent = stats.zesty;
+      humorousValue.textContent = stats.humorous;
+      deepvoiceValue.textContent = stats.deepvoice;
+      annoyingValue.textContent = stats.annoying;
+
+      scoreDisplay.textContent = Math.round(percentRyry) + "% RYRY";
+      scoreDisplay.className = "v " + scoreColorClass(percentRyry);
+      aiJudge.textContent = judge;
+      rankValue.textContent = rank;
+      flavorText.textContent = flavor;
+
+      drawRadar(stats);
+
+      if(uploadedAvatar){
+        showUploadedPreview(uploadedAvatar);
+      }else{
+        drawAvatar(stats);
+      }
+    }
+
+    function randomizeStats(){
+      funnyInput.value = 1 + Math.floor(Math.random() * 10);
+      zestyInput.value = 1 + Math.floor(Math.random() * 10);
+      humorousInput.value = 1 + Math.floor(Math.random() * 10);
+      deepvoiceInput.value = 1 + Math.floor(Math.random() * 10);
+      annoyingInput.value = 1 + Math.floor(Math.random() * 10);
+      updateBars();
+    }
+
+    function resetStats(){
+      funnyInput.value = 5;
+      zestyInput.value = 5;
+      humorousInput.value = 5;
+      deepvoiceInput.value = 5;
+      annoyingInput.value = 5;
+      nameInput.value = "";
+      variantInput.value = "";
+      avatarUpload.value = "";
+      uploadedAvatar = null;
+      updateBars();
+    }
+
+    function medalForIndex(i){
+      if(i === 0) return { icon:"🥇", className:"gold" };
+      if(i === 1) return { icon:"🥈", className:"silver" };
+      if(i === 2) return { icon:"🥉", className:"bronze" };
+      return { icon:"#"+(i+1), className:"normal" };
+    }
+
+    function addPlayer(){
+      const baseName = nameInput.value.trim();
+      const comment = variantInput.value.trim();
+
+      if(!baseName){
+        alert("ENTER PLAYER NAME");
+        return;
+      }
+
+      const fullName = comment
+        ? baseName + " - " + comment + " Variant"
+        : baseName;
+
+      const stats = getStats();
+      const score = calcRyryScore(stats);
+      const percentRyry = (score / maxScore) * 100;
+
+      let avatarImage;
+
+      if(uploadedAvatar){
+        avatarImage = uploadedAvatar;
+      }else{
+        drawAvatar(stats);
+        avatarImage = avatarCanvas.toDataURL("image/png");
+      }
+
+      players.push({
+        name: fullName,
+        percent: +percentRyry.toFixed(1),
+        rank: getRank(score),
+        judge: getAiJudge(stats, score),
+        flavor: getFlavor(stats),
+        avatar: avatarImage,
+        stats
+      });
+
+      players.sort((a,b) => b.percent - a.percent);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+      renderPlayers();
+    }
+
+    function clearBoard(){
+      const ok = confirm("CLEAR THE LEADERBOARD?");
+      if(!ok) return;
+      players = [];
+      localStorage.removeItem(STORAGE_KEY);
+      renderPlayers();
+    }
+
+    function renderPlayers(){
+      if(players.length === 0){
+        playersDiv.innerHTML = `
+          <div class="player">
+            <div class="medal normal">?</div>
+            <img class="player-avatar" alt="empty avatar" src="data:image/svg+xml;utf8,${encodeURIComponent(`
+              <svg xmlns='http://www.w3.org/2000/svg' width='52' height='52'>
+                <rect width='52' height='52' fill='%23111'/>
+                <rect x='10' y='10' width='32' height='32' fill='%23333'/>
+              </svg>
+            `)}">
+            <div class="player-main">
+              <div class="player-name">NO PLAYERS YET</div>
+              <div class="player-sub">add a build to start the ranking war</div>
+            </div>
+            <div class="player-score">0% RYRY</div>
+          </div>
+        `;
+        return;
+      }
+
+      playersDiv.innerHTML = players.map((p,i) => {
+        const medal = medalForIndex(i);
+        const extra = i === 0 ? " top-player" : "";
+
+        return `
+          <div class="player${extra}">
+            <div class="medal ${medal.className}">${medal.icon}</div>
+            <img class="player-avatar" src="${p.avatar}" alt="${escapeHtml(p.name)} avatar">
+            <div class="player-main">
+              <div class="player-name">${escapeHtml(p.name)}</div>
+              <div class="player-sub">
+                ${escapeHtml(p.rank)} // ${escapeHtml(p.judge)}
+                <br>
+                FY ${p.stats.funny} | ZY ${p.stats.zesty} | HM ${p.stats.humorous} | DV ${p.stats.deepvoice} | AN ${p.stats.annoying}
+              </div>
+            </div>
+            <div class="player-score">${Math.round(p.percent)}% RYRY</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function escapeHtml(str){
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function drawRadar(stats){
+      const ctx = radarCtx;
+      const w = radarCanvas.width;
+      const h = radarCanvas.height;
+      const cx = w / 2;
+      const cy = h / 2 + 15;
+      const radius = 120;
+
+      const labels = ["FUNNY", "ZESTY", "HUMOR", "DEEPVOICE", "ANNOY"];
+      const values = [
+        stats.funny,
+        stats.zesty,
+        stats.humorous,
+        stats.deepvoice,
+        stats.annoying
+      ];
+
+      const angles = [];
+      const start = -Math.PI / 2;
+      const step = (Math.PI * 2) / 5;
+
+      for(let i = 0; i < 5; i++){
+        angles.push(start + step * i);
+      }
+
+      ctx.clearRect(0,0,w,h);
+      ctx.imageSmoothingEnabled = false;
+
+      for(let ring = 1; ring <= 5; ring++){
+        const r = radius * (ring / 5);
+        ctx.beginPath();
+
+        angles.forEach((a, i) => {
+          const x = cx + Math.cos(a) * r;
+          const y = cy + Math.sin(a) * r;
+          if(i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+
+        ctx.closePath();
+        ctx.strokeStyle = ring === 5 ? "#7ef9ff" : "rgba(126,249,255,0.25)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      angles.forEach((a) => {
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(
+          cx + Math.cos(a) * radius,
+          cy + Math.sin(a) * radius
+        );
+        ctx.strokeStyle = "rgba(255,255,255,0.18)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+
+      ctx.beginPath();
+      values.forEach((v, i) => {
+        const r = radius * (v / 10);
+        const x = cx + Math.cos(angles[i]) * r;
+        const y = cy + Math.sin(angles[i]) * r;
+
+        if(i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.closePath();
+      ctx.fillStyle = "rgba(255,79,216,0.35)";
+      ctx.strokeStyle = "#63f3ff";
+      ctx.lineWidth = 4;
+      ctx.fill();
+      ctx.stroke();
+
+      values.forEach((v, i) => {
+        const r = radius * (v / 10);
+        const x = cx + Math.cos(angles[i]) * r;
+        const y = cy + Math.sin(angles[i]) * r;
+        ctx.fillStyle = "#ffe066";
+        ctx.fillRect(x - 5, y - 5, 10, 10);
+      });
+
+      ctx.fillStyle = "#f6f7fb";
+      ctx.font = "11px 'Press Start 2P'";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      labels.forEach((label, i) => {
+        const x = cx + Math.cos(angles[i]) * (radius + 34);
+        const y = cy + Math.sin(angles[i]) * (radius + 34);
+
+        const offsetX =
+          i === 1 ? 18 :
+          i === 4 ? -18 :
+          0;
+
+        const offsetY =
+          i === 0 ? -8 :
+          i === 2 || i === 3 ? 8 :
+          0;
+
+        ctx.fillText(label, x + offsetX, y + offsetY);
+      });
+    }
+
+    function drawAvatar(stats){
+      const ctx = avatarCtx;
+      const s = 8;
+      ctx.clearRect(0,0,96,96);
+      ctx.imageSmoothingEnabled = false;
+
+      function px(x, y, color){
+        ctx.fillStyle = color;
+        ctx.fillRect(x * s, y * s, s, s);
+      }
+
+      ctx.fillStyle = "#1a1a1a";
+      ctx.fillRect(0,0,96,96);
+
+      const skin =
+        stats.annoying >= 8 ? "#ffd0b3" :
+        stats.zesty >= 8 ? "#f6c88f" :
+        "#f1c27d";
+
+      const hair =
+        stats.deepvoice >= 8 ? "#111111" :
+        stats.humorous >= 8 ? "#5b2c83" :
+        "#6b3f1f";
+
+      const visor =
+        stats.zesty >= 7 ? "#ff4fd8" :
+        stats.funny >= 7 ? "#63f3ff" :
+        "#ffe066";
+
+      const shirt =
+        stats.humorous >= 7 ? "#7ef9ff" :
+        stats.funny >= 7 ? "#ffe066" :
+        "#a855f7";
+
+      for(let y = 2; y <= 8; y++){
+        for(let x = 2; x <= 8; x++){
+          px(x, y, skin);
+        }
+      }
+
+      for(let x = 2; x <= 8; x++){
+        px(x, 2, hair);
+      }
+      for(let x = 1; x <= 9; x++){
+        px(x, 1, hair);
+      }
+      px(1,2,hair);
+      px(9,2,hair);
+
+      px(3,4,"#111");
+      px(7,4,"#111");
+
+      if(stats.zesty >= 6 || stats.funny >= 7){
+        for(let x = 2; x <= 8; x++) px(x,4,visor);
+      }
+
+      if(stats.deepvoice >= 5){
+        px(4,6,"#3a2414");
+        px(5,6,"#3a2414");
+        px(6,6,"#3a2414");
+      }else{
+        px(4,6,"#ad5f45");
+        px(5,6,"#ad5f45");
+        px(6,6,"#ad5f45");
+      }
+
+      if(stats.funny >= 8){
+        px(3,6,"#ad5f45");
+        px(7,6,"#ad5f45");
+      }
+
+      for(let x = 3; x <= 7; x++){
+        px(x,9,shirt);
+        px(x,10,shirt);
+      }
+      px(2,10,shirt);
+      px(8,10,shirt);
+
+      if(stats.humorous >= 7){
+        px(2,9,shirt);
+        px(8,9,shirt);
+      }
+
+      if(stats.annoying >= 8){
+        px(8,3,"#ff0000");
+      }
+
+      if(stats.zesty >= 9){
+        px(2,3,"#ff00ff");
+      }
+
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 4;
+      ctx.strokeRect(0,0,96,96);
+    }
+
+    function spawnStars(){
+      const bg = document.getElementById("bg");
+
+      for(let i = 0; i < 45; i++){
+        const star = document.createElement("div");
+        star.className = "star";
+        star.style.left = Math.random() * 100 + "vw";
+        star.style.top = (60 + Math.random() * 60) + "vh";
+
+        const size = Math.random() > 0.75 ? 6 : 4;
+        star.style.width = size + "px";
+        star.style.height = size + "px";
+        star.style.animationDuration = (10 + Math.random() * 16) + "s";
+        star.style.animationDelay = (-Math.random() * 18) + "s";
+
+        bg.appendChild(star);
+      }
+    }
+
+    avatarUpload.addEventListener("change", function(){
+      const file = this.files[0];
+      if(!file) return;
+
+      const reader = new FileReader();
+
+      reader.onload = function(e){
+        uploadedAvatar = e.target.result;
+        showUploadedPreview(uploadedAvatar);
+      };
+
+      reader.readAsDataURL(file);
+    });
+
+    randomizeBtn.addEventListener("click", randomizeStats);
+    resetBtn.addEventListener("click", resetStats);
+    addPlayerBtn.addEventListener("click", addPlayer);
+    clearBoardBtn.addEventListener("click", clearBoard);
+
+    spawnStars();
+    updateBars();
+    renderPlayers();
+  </script>
+</body>
+</html>
